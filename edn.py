@@ -173,7 +173,15 @@ def parser(target, stop=None):
             if c in '[(':
                 target.send(tuple(l))
             elif c == '#':
-                target.send(frozenset(l))
+                not_hashable = False  # avoid TypeError when we have a list where its contents are not dict
+                for item in l:
+                    not_hashable = not_hashable or isinstance(item, (dict, list, set))
+                    if not_hashable:
+                        break
+                if not_hashable:
+                    target.send(tuple(l))
+                else:
+                    target.send(frozenset(l))
             else:
                 if len(l)%2:
                     raise Exception("Map literal must contain an even number of elements")
@@ -192,6 +200,7 @@ def loads(s):
     return l[0]
 
 if __name__ == '__main__':
+    print loads(b'(List #{[123 456 {}] {a 1 b 2 c ({}, [])}})')
     print loads(b'(:graham/stratton true  \n , "A string with \\n \\"s" true #uuid "f81d4fae7dec11d0a76500a0c91e6bf6")')
     print loads(b'[\space \\\xE2\x82\xAC [true []] ;true\n[true #inst "2012-09-10T23:39:43.309-00:00" true ""]]')
     print loads(b' {true false nil    [true, ()] 6 {#{nil false} {nil \\newline} }}')
