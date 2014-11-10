@@ -39,7 +39,7 @@ class Datomic(object):
         args = '[{:db/alias ' + self.storage + '/' + dbname
         if history:
             args += ' :history true'
-        args += '} ' + ' '.join(str(a) for a in extra_args) + ']'
+        args += ' ' + ' '.join(str(a) for a in extra_args) + '}]'
         r = requests.get(urljoin(self.location, 'api/query'),
                          params={'args' : args, 'q':query},
                          headers={'Accept':'application/edn'})
